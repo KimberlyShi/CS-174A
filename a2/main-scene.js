@@ -68,23 +68,6 @@ window.Transforms_Sandbox = window.classes.Transforms_Sandbox =
            this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));   // Draw the bottom box.
            this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));
 
-
-
-
-            // const purple = Color.of(1, 0, 1,1);
-            // const periwinkle = Color.of(0, 215, 237, 1);
-            // const skyblue = Color.of(150, 215, 0, 1);
-            // const turquoise = Color.of(155, 0, 237, 1);
-            // const green = Color.of(0, 0, 98, 1);
-            // const blush = Color.of(153, 95, 0, 1);
-            // const colors = [blue, yellow, purple, periwinkle, skyblue, turquoise, green, blush];
-            // for (let i = 0; i < 8; i++)
-            // {
-            // model_transform = model_transform = model_transform.times(Mat4.translation([0, -2, 0]));
-            // this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: colors[i]}));
-            // }
-
-
         }
     };
 
@@ -178,7 +161,7 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             this.colors;
             this.outline = false;
             this.sitStill = false;
-            this.numOfBox = 0;
+            //this.numOfBox;
         }
 
         set_colors() {
@@ -208,51 +191,50 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             });
         }
 
-        draw_box(graphics_state, model_transform) {
+        draw_box(graphics_state, model_transform, numOfBox) {
             // TODO:  Helper function for requirement 3 (see hint).
+let rotation;
 //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
 
 
 
             const t = this.t = graphics_state.animation_time / 1000;
 
-            const color = this.colors[this.numOfBox];
+            const color = this.colors[numOfBox];
             const angle = (Math.PI * 0.04);
 
-            if(this.numOfBox == 0)
+            if(numOfBox == 0)
                 {
                     rotation = 0;
                 }
-            else if (this.sitStill)
-                {
-                   var rotation = (-angle / 2) - (angle / 2 * Math.sin(0.5* Math.PI));
-                }
             else
                 {
-                   var rotation = (-angle/2) - (angle/2 *Math.sin(3000*t + 0.5* Math.PI));
+                if (this.sitStill) {
+                    rotation = (-angle / 2) - (angle / 2 * Math.sin(0.5 * Math.PI));
+                } else {
+                    rotation = (-angle / 2) - (angle / 2 * Math.sin(3000 * t + 0.5 * Math.PI));
 
                 }
-
+            }
             model_transform   = model_transform.times( Mat4.translation( [1, 1.5, 0] ) )
                 .times( Mat4.rotation( rotation, Vec.of(0, 0, 1 ) ) )
                 .times( Mat4.translation([-1, 1.5, 0]) )
                 .times( Mat4.scale([ 1, 1.5, 1 ]) );
 
-            if(this.numOfBox == 0)
+            if(numOfBox == 0)
             {
                 this.shapes.strip.draw (graphics_state, model_transform, this.plastic.override({ color }), "TRIANGLE_STRIP");
                 model_transform = model_transform.times(Mat4.scale([ 1, 0.67, 1 ]));
             }
 
-            if(this.outline)
-            {
-                this.shapes.outline.draw( graphics_state, model_transform, this.white, "LINES" );
-                model_transform = model_transform.times(Mat4.scale([ 1, 0.67, 1 ]));
-            }
-            else
-            {
-                this.shapes.box.draw( graphics_state, model_transform, this.plastic.override({ color }) );
-                model_transform = model_transform.times(Mat4.scale([ 1, 0.67, 1 ]));
+            else {
+                if (this.outline) {
+                    this.shapes.outline.draw(graphics_state, model_transform, this.white, "LINES");
+                    model_transform = model_transform.times(Mat4.scale([1, 0.67, 1]));
+                } else {
+                    this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color}));
+                    model_transform = model_transform.times(Mat4.scale([1, 0.67, 1]));
+                }
             }
             return model_transform;
         }
@@ -265,8 +247,8 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
             for (let i = 0; i < 8; i++)
             {
-               this.numOfBox = i;
-                model_transform = this.draw_box( graphics_state, model_transform);
+               //this.numOfBox = i;
+                model_transform = this.draw_box( graphics_state, model_transform,i);
             }
 
 
