@@ -16,7 +16,7 @@ class Assignment_Four_Scene extends Scene_Component
         const shapes = { box:   new Cube(),
                          box_2: new Cube(),
                          axis:  new Axis_Arrows(),
-                        extra_credit: new MyShape(),
+                        extraCredit: new MyShape(),
                        }
                        shapes.box_2.texture_coords = shapes.box_2.texture_coords.map(x => x.times(2));
         this.submit_shapes( context, shapes );
@@ -34,7 +34,7 @@ class Assignment_Four_Scene extends Scene_Component
                   ambient: 1, texture: context.get_instance("assets/redPandaMod.jpg", true)
               }),
 
-              extra_credit: context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ) ),
+              extraCredit: context.get_instance( Phong_Shader ).material( Color.of(227/2255,206/255,245/255,1 ) ),
 
           }
 
@@ -52,8 +52,9 @@ class Assignment_Four_Scene extends Scene_Component
           this.transformcube2 = Mat4.identity();
           this.transformcube2 = this.transformcube2.times(Mat4.translation([2,0,0]));
 
-          //Cube 3??
-          this.extra_credit = { transform: Mat4.identity().times( Mat4.translation([0, -2, 0]) ) };
+          //Extra Credit
+          this.transformExtraCredit = Mat4.identity();
+          this.transformExtraCredit = this.transformExtraCredit.times(Mat4.translation([0, -2, 0]));
       }
 
       startStop()
@@ -72,8 +73,6 @@ class Assignment_Four_Scene extends Scene_Component
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
 
         // TODO:  Draw the required boxes. Also update their stored matrices.
-        // this.shapes.axis.draw( graphics_state, Mat4.identity(), this.materials.phong );
-
           if(this.isRotating)
           {
               this.transformcube1 = this.transformcube1.times(Mat4.rotation(Math.PI * dt, [1,0,0]))
@@ -82,9 +81,8 @@ class Assignment_Four_Scene extends Scene_Component
           
           this.shapes.box.draw(graphics_state, this.transformcube1, this.materials.panda);
           this.shapes.box_2.draw(graphics_state, this.transformcube2, this.materials.redPanda);
-          this.extra_credit.translation = this.extra_credit.translation;
-          this.shapes.extra_credit.draw( graphics_state, this.extra_credit.transform, this.materials.extra_credit );
 
+          this.shapes.extraCredit.draw(graphics_state, this.transformExtraCredit, this.materials.extraCredit);
       }
   }
 
@@ -127,7 +125,8 @@ class Texture_Rotate extends Phong_Shader
                                             // Phong shading is not to be confused with the Phong Reflection Model.
 
          //ADDED
-         float compute = mod((6.28) * .25 * animation_time, 44. * 3.14);
+         float pi = 3.14159265;
+         float compute = mod((6.28) * .25 * animation_time, 44.0 * pi);
          mat4 mMatrix = mat4(cos(compute), sin(compute), 0, 0, -sin(compute), cos(compute), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
          vec4 temp = ((vec4(f_tex_coord, 0, 0) + vec4(-.5, -.5, 0., 0.)) * mMatrix) + vec4(.5, .5, 0., 0.);
          vec4 tex_color = texture2D( texture, temp.xy );
@@ -146,18 +145,30 @@ window.MyShape = window.classes.MyShape = class MyShape extends Shape
     constructor()
     {
         super( "positions", "normals", "texture_coords" );
-        let down = 0.7;
+        for( var i = 0; i < 3; i++ ) {
+            for( var j = 0; j < 3; j++ ) {
+                for( var k = 0; k < 3; k++ ) {
 
-        let scaleMat = Mat4.scale([down, down, down]);
-        for( var i = -1; i <= 1; i++ ) {
-            for( var j = -1; j <= 1; j++ ) {
-                for( var k = -1; k <= 1; k++ ) {
-                    let cube_transform = Mat4.identity().times( Mat4.scale( [0.3, 0.3, 0.3] ) );
+                    let cubeTransform = Mat4.identity().times(Mat4.scale([0.6, 0.6, 0.6]));
+                    Cube.insert_transformed_copy_into(this, ["positions", "normals", "texture_coords"], cubeTransform);
                     for( var c = 0; c < 6; c++ ) {
-                        cube_transform = cube_transform
-                            .times( scaleMat )
-                            .times( Mat4.translation([1.5*i, 1.5*j, 1.9*k]) );
-                        Cube.insert_transformed_copy_into( this, ["positions", "normals", "texture_coords"], cube_transform );
+                        cubeTransform = cubeTransform.times( Mat4.scale([0.5, 0.5, 0.5]));
+                        cubeTransform = cubeTransform.times( Mat4.translation([0, 1.2*j - 1, 1.9 * k - 1]) );
+                        Cube.insert_transformed_copy_into( this, ["positions", "normals", "texture_coords"], cubeTransform );
+                    }
+
+                    for( var h = 0; h < 6; h++ ) {
+                        let triTransform = Mat4.identity().times(Mat4.scale([0.7, 0.7, 0.7]));
+                        triTransform = triTransform.times(Mat4.scale([0.6, 0.6, 0.6])).times(Mat4.translation([ 1.4, 0.8 * j - 0.3 - 0.9, 0.8 * k - 0.3 - 0.6]));
+                        Tetrahedron.insert_transformed_copy_into(this, ["positions", "normals", "texture_coords"], triTransform);
+                        let secondTransform= Mat4.identity().times(Mat4.scale([-0.7, -0.7, -0.7]));
+                        secondTransform = secondTransform.times(Mat4.scale([0.6, 0.6, 0.6])).times(Mat4.translation([1.3, 0.8 * j - 0.3 - 0.9, 0.8 * k - 0.3 - 1]));
+                        Tetrahedron.insert_transformed_copy_into(this, ["positions", "normals", "texture_coords"], secondTransform);
+                        let thirdTransform= Mat4.identity().times(Mat4.rotation(-Math.PI/2, 0, 1, 0));
+                        thirdTransform = thirdTransform.times(Mat4.scale([-0.7, -0.7, -0.7]));
+                        thirdTransform = thirdTransform.times(Mat4.scale([0.6, 0.6, 0.6])).times(Mat4.translation([1.3, 0.8 * j - 0.3 - 0.9 - 3, 0.8 * k - 0.3 - 1]));
+                        Tetrahedron.insert_transformed_copy_into(this, ["positions", "normals", "texture_coords"], thirdTransform);
+
                     }
                 }
             }
