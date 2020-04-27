@@ -41,8 +41,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                         {ambient: 1}),
                     planet1: context.get_instance(Phong_Shader).material(Color.of(0.25, 0.25, 0.35, 1),
                         {ambient: 0}, {diffusivity: 1}, {specularity: 0}, {smoothness: 0} ),
-                    // planet2: context.get_instance( Phong_Shader ).material( Color.of(0.5, 0.8, 0.65, 1),
-                    //     {ambient: 0}, {diffusivity: .4}),
                     planet2: context.get_instance( Phong_Shader).material(), //will be override
                     planet3: context.get_instance( Phong_Shader ).material( Color.of(0.55, 0.40, 0.15, 1),
                         {ambient: 0}, {diffusivity: 1}, {specularity: 1} ), //max diffusivity and specularity
@@ -50,11 +48,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                         {ambient: 0}, {specularity: .9}, {smoothness: 100} ),
                     moon: context.get_instance( Phong_Shader ).material( Color.of( 0.65, 0.85, 0.55, 1),
                         {ambient: 0} ),
-                    planet5: context.get_instance( Phong_Shader ).material( Color.of(0.75, 0.75, 0.75, 1))
+                    planet5: context.get_instance( Phong_Shader ).material( Color.of(0.75, 0.9, 0.75, 1))
                 };
-
-            // this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
-            this.lights = [ new Light( Vec.of( 0,0,0,0 ), Color.of( 0,0,0,0),0)];
+            this.lights = [new Light( Vec.of( 0,0,0,0 ), Color.of( 0,0,0,0),0)];
         }
 
         make_control_panel() {
@@ -77,10 +73,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
 
             // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 2 and 3)
-            // this.shapes.torus2.draw(graphics_state, Mat4.identity(), this.materials.test);
 
-            let radius = 2 + Math.sin(2 * Math.PI/5 * t);
-            let color = 0.5 + 0.5 * Math.sin(2 * Math.PI/5 * t);
+            let radius = 2 + Math.sin(Math.PI * 0.2 * t);
+            let color = 0.5 + 0.5 * Math.sin(Math.PI * 0.2 * t);
 
             //Sun
             let transformSun = Mat4.identity();
@@ -94,8 +89,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             transformPlanet1 = transformPlanet1.times( Mat4.rotation(t, Vec.of(0,1,0)));
             transformPlanet1 = transformPlanet1.times( Mat4. translation([5,0,0]));
             transformPlanet1 = transformPlanet1.times( Mat4.rotation(t, Vec.of(0,1,0)));
-            //attach to key
-            this.planet_1 = transformPlanet1;
 
             this.shapes.planet1Shape.draw(graphics_state, transformPlanet1, this.materials.planet1);
             //Planet 2
@@ -106,17 +99,12 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             transformPlanet2 = transformPlanet2.times(Mat4.rotation(t * 0.8, Vec.of(0,1,0)));
             var gouraudColoring;
             //interpolates coloring
-            if (Math.floor(t) % 2 == 0) {
-                gouraudColoring = 0;
-            }
-            else {
+            if (Math.floor(t) % 2 != 0) {
                 gouraudColoring = 1;
             }
-
-            //attached to key
-            this.planet_2 = transformPlanet2;
-
-            // this.shapes.planet2Shape.draw(graphics_state, transformPlanet2, this.materials.planet2);
+            else {
+                gouraudColoring = 0;
+            }
             this.shapes.planet2Shape.draw(graphics_state, transformPlanet2, this.materials.planet2.override(
                 {
                     color: Color.of(0.2, 0.8, 0.5, 1), specularity: 1, diffusivity: 0.2,
@@ -124,49 +112,50 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 }
             ));
 
-            //Planet 3     Saturn
+            //Planet 3: Saturn
+            //the planet must wobble on in its rotation over time (have an axis not the same as the orbit axis).
             let transformPlanet3 = Mat4.identity();
-            // transformPlanet3 = transformPlanet3.times(Mat4.rotation(t/1.4, Vec.of(0,1,0)));
-            // transformPlanet3 = transformPlanet3.times(Mat4.translation([11,0,0]));
-            // transformPlanet3 = transformPlanet3.times(Mat4.rotation(t/1.4, Vec.of(1,1,1)));
+            transformPlanet3 = transformPlanet3.times(Mat4.rotation(t * 0.6, Vec.of(0,1,0)));
+            transformPlanet3 = transformPlanet3.times(Mat4.translation([11,0,0]));
+            transformPlanet3 = transformPlanet3.times(Mat4.rotation(t , Vec.of(1,1,1)));
+            transformPlanet3 = transformPlanet3.times(Mat4.rotation(t , Vec.of(0,1,0)));
 
-           transformPlanet3 = transformPlanet3.times( Mat4.translation([11 * Math.sin(.35 * t), 0, 11 * Math.cos(.35 * t)]));
-            // transformPlanet3 = transformPlanet3.times( Mat4.rotation( 1, Vec.of(.2,.2,.2)))
-            //     .times( Mat4.rotation( .5 * t, Vec.of(Math.sin(.02), Math.cos(.02), 0)));
-            transformPlanet3 = transformPlanet3.times( Mat4.rotation( 1, Vec.of(.2,.2,.2)));
-            transformPlanet3 = transformPlanet3.times( Mat4.rotation( .5 * t, Vec.of(Math.sin(.02), Math.cos(.02), 0)));
             this.shapes.sphere.draw( graphics_state, transformPlanet3, this.materials.planet3 );
-            //attached to key
-            this.planet_3 = transformPlanet3;
-
-            transformPlanet3 = transformPlanet3.times( Mat4.scale([1, 1, .001]));
-            this.shapes.torus2.draw(graphics_state, transformPlanet3, this.materials.ring);
+            //rings of Planet 3
+            let transformRings = transformPlanet3;
+            //reduced z axis scale
+            transformRings = transformRings.times( Mat4.scale([1, 1, .001])); //rings on a different axis
+            this.shapes.torus2.draw(graphics_state, transformRings, this.materials.ring);
 
             //Planet 4
             let transformPlanet4 = Mat4.identity();
-            transformPlanet4 = transformPlanet4.times(Mat4.rotation(t/1.67, Vec.of(0,1,0)));
+            transformPlanet4 = transformPlanet4.times(Mat4.rotation(t * 0.4, Vec.of(0,1,0)));
             transformPlanet4 = transformPlanet4.times(Mat4.translation([14,0,0]));
-            transformPlanet4 = transformPlanet4.times(Mat4.rotation(t/1.67, Vec.of(0,1,0)));
+            transformPlanet4 = transformPlanet4.times(Mat4.rotation(t * 0.4, Vec.of(0,1,0)));
 
             this.shapes.sphere. draw(graphics_state, transformPlanet4, this.materials.planet4);
-            this.planet_4 = transformPlanet4;
-
+            //moon of planet 4
             let moonTransform = transformPlanet4;
-            moonTransform = moonTransform.times(Mat4.rotation(t/1.2, Vec.of(0,1,0)));
+            moonTransform = moonTransform.times(Mat4.rotation(t * 0.2, Vec.of(0,1,0)));
             moonTransform = moonTransform.times(Mat4.translation([2,0,0]));
-            moonTransform = moonTransform.times(Mat4.scale([0.75, 0.75, 0.75]));
+            moonTransform = moonTransform.times(Mat4.scale([0.5, 0.5, 0.5])); //moon is smaller than planet4
             this.shapes.moon.draw(graphics_state, moonTransform, this.materials.moon);
-            this.moon = moonTransform;
 
             //Planet 5
             //half circle closer
             let transformPlanet5 = Mat4.identity();
-            transformPlanet5 = transformPlanet5.times(Mat4.rotation(t/1.6, Vec.of(0,1,0)));
-            transformPlanet5 = transformPlanet5.times(Mat4.translation([-17,0,0]));
+            transformPlanet5 = transformPlanet5.times(Mat4.rotation(t * 0.15, Vec.of(0,1,0)));
+            transformPlanet5 = transformPlanet5.times(Mat4.translation([17,0,0]));
             transformPlanet5 = transformPlanet5.times(Mat4.rotation(t, Vec.of(0,1,0)));
             this.shapes.gridsphere.draw(graphics_state, transformPlanet5, this.materials.planet5);
-            this.planet_5 = transformPlanet5;
 
+            //attach to key
+            this.planet_1 = transformPlanet1;
+            this.planet_2 = transformPlanet2;
+            this.planet_3 = transformPlanet3;
+            this.planet_4 = transformPlanet4;
+            this.planet_5 = transformPlanet5;
+            this.moon = moonTransform;
 
             if(this.attached != null || this.attached != undefined) {
                 let desired = Mat4.inverse(this.attached().times(Mat4.translation([0, 0, 5])));
@@ -254,8 +243,9 @@ window.Grid_Sphere = window.classes.Grid_Sphere =
             // TODO:  Complete the specification of a sphere with lattitude and longitude lines
             //        (Extra Credit Part III)
 
-            const semicircle = Array( rows ).fill( Vec.of( 0,0,1 ) ).map((p,n,a) =>
-                Mat4.rotation(Math.PI * n/(a.length-1), Vec.of(0,-1,0) ).times( p.to4(1) ).to3());
+            //used example in Torus class found in dependencies.js
+            const semicircle = Array( rows ).fill( Vec.of( 0,0,1 ) ).map((p, i,a) =>
+                Mat4.rotation(Math.PI * i/(a.length - 1), Vec.of(0,-1,0) ).times( p.to4(1) ).to3());
             Surface_Of_Revolution.insert_transformed_copy_into(this, [rows, columns, semicircle]);
 
         }

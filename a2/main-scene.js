@@ -65,8 +65,8 @@ window.Transforms_Sandbox = window.classes.Transforms_Sandbox =
             model_transform = model_transform.times(Mat4.rotation(1, Vec.of(0, 0, 1)))  // Rotate another axis by a constant value.
                 .times(Mat4.scale([1, 2, 1]))      // Stretch the coordinate frame.
                 .times(Mat4.translation([0, -1.5, 0]));     // Translate down enough for the two volumes to miss.
-           this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));   // Draw the bottom box.
-           this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));
+            this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));   // Draw the bottom box.
+            this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));
 
         }
     };
@@ -80,18 +80,18 @@ window.Cube_Outline = window.classes.Cube_Outline =
             // When a set of lines is used in graphics, you should think of the list entries as
             // broken down into pairs; each pair of vertices will be drawn as a line segment.
 
-            this.positions.push( ...Vec.cast(
-                [1,-1,-1], [-1,-1,-1], [-1,-1,1],  [1,-1,1],  [-1,1,1],  [1,1,1],  [1,1,-1], [-1,1,-1],
-                [1,-1,-1], [1,1,-1],  [-1,-1,-1], [-1,1,-1], [-1,-1,1], [-1,1,1], [1,1,1], [1,-1,1],
-                [1,1,-1],  [-1,1,-1],  [-1,-1,-1], [1,-1,-1], [-1,-1,1], [1,-1,1],  [1,1,1],  [-1,1,1],
-                [1,-1,1],  [1,-1,-1], [-1,-1,-1], [-1,-1,1], [-1,1,-1], [-1,1,1],  [1,1,1],  [1,1,-1])
+            this.positions.push(...Vec.cast(
+                [1, -1, -1], [-1, -1, -1], [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, 1, -1], [-1, 1, -1],
+                [1, -1, -1], [1, 1, -1], [-1, -1, -1], [-1, 1, -1], [-1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, 1],
+                [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+                [1, -1, 1], [1, -1, -1], [-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [-1, 1, 1], [1, 1, 1], [1, 1, -1])
             );
 
             const white = Color.of(1, 1, 1, 1);
-            this.colors.push( white, white, white, white, white, white, white, white,
+            this.colors.push(white, white, white, white, white, white, white, white,
                 white, white, white, white, white, white, white, white,
                 white, white, white, white, white, white, white, white,
-                white, white, white, white, white, white, white, white );
+                white, white, white, white, white, white, white, white);
             this.indexed = false;       // Do this so we won't need to define "this.indices".
         }
     };
@@ -100,21 +100,42 @@ window.Cube_Single_Strip = window.classes.Cube_Single_Strip =
     class Cube_Single_Strip extends Shape {
         constructor() {
             super("positions", "normals");
-
             // TODO (Extra credit part I)
-            this.positions.push( ...Vec.cast( [-1, -1, -1 ], [1, -1, -1], [-1, 1, -1], [1, 1, -1],
-            [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1] ) );
-            this.normals.push( ...Vec.cast( [-1, -1, -1 ], [1, -1, -1], [-1, 1, -1], [1, 1, -1],
-            [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1] ) );
-            this.indices.push( 0, 2, 1, 1,
-            0, 4, 4, 0,
-            6, 6, 4, 5,
-            5, 4, 1, 1,
-            5, 7, 7, 5,
-            6, 6, 7, 3,
-            3, 7, 1, 1,
-            3, 2, 2, 3,
-            6, 6, 2, 0);
+            //Reference: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip#38855946
+            //Essentially, in each square face of the cube, will be
+            //  ------>
+            //     /
+            //    /
+            //   v
+            //  ----->
+            //to form triangle strip
+
+            //POSITIONS:
+            //front square: top left, top right, bottom left, bottom right
+            //back square: top left, top right, bottom left, bottom right
+            this.positions.push(...Vec.cast(
+                [-1,1,1], [1,1,1], [-1,-1,1], [1,-1, 1],
+                [-1,1,-1], [1,1,-1], [-1,-1,-1], [1,-1,-1]
+            ));
+            this.normals.push(...Vec.cast(
+                [-1,1,1], [1,1,1], [-1,-1,1], [1,-1, 1],
+                [-1,1,-1], [1,1,-1], [-1,-1,-1], [1,-1,-1]
+            ));
+
+
+           this.indices.push(
+               0, 1, 2, 3, // front
+               6, 7, //bottom
+               4, 5, //back
+               0, 1, //top
+               5, 3, 7, //side right
+               1, //connection to
+               0, 4, 2, 6 //side left
+
+           );
+
+            //reference:
+            /* from https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip#38855946 */
 
 
         }
@@ -161,20 +182,20 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             this.colors;
             this.outline = false;
             this.sitStill = false;
-            //this.numOfBox;
         }
 
         set_colors() {
             // TODO:  Create a class member variable to store your cube's colors.
             this.colors = [
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1),
-                Color.of(Math.random(),Math.random(),Math.random(),1)
+                Color.of(Math.random(), Math.random(), Math.random(), 0.4),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1),
+                Color.of(Math.random(), Math.random(), Math.random(), 1)
+
             ]
         }
 
@@ -193,47 +214,39 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
 
         draw_box(graphics_state, model_transform, numOfBox) {
             // TODO:  Helper function for requirement 3 (see hint).
-let rotation;
+            let rotate;
 //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
-
 
 
             const t = this.t = graphics_state.animation_time / 1000;
 
             const color = this.colors[numOfBox];
-            const angle = (Math.PI * 0.04);
+            const angle = -(Math.PI * 0.04);
 
-            if(numOfBox == 0)
-                {
-                    rotation = 0;
-                }
-            else
-                {
+            if (numOfBox == 0) {
+                rotate = 0;
+            } else {
                 if (this.sitStill) {
-                    rotation = (-angle / 2) - (angle / 2 * Math.sin(0.5 * Math.PI));
+                    rotate = angle;
                 } else {
-                    rotation = (-angle / 2) - (angle / 2 * Math.sin(3000 * t + 0.5 * Math.PI));
-
+                    rotate = (angle/2) + (angle/2) * Math.sin((6 * Math.PI * t));
                 }
             }
-            model_transform   = model_transform.times( Mat4.translation( [1, 1.5, 0] ) )
-                .times( Mat4.rotation( rotation, Vec.of(0, 0, 1 ) ) )
-                .times( Mat4.translation([-1, 1.5, 0]) )
-                .times( Mat4.scale([ 1, 1.5, 1 ]) );
+            model_transform = model_transform.times(Mat4.translation([1, 1.5, 0]))
+                .times(Mat4.rotation(rotate, Vec.of(0, 0, 1)))
+                .times(Mat4.translation([-1, 1.5, 0]))
+                .times(Mat4.scale([1, 1.5, 1]));
 
-            if(numOfBox == 0)
-            {
-                this.shapes.strip.draw (graphics_state, model_transform, this.plastic.override({ color }), "TRIANGLE_STRIP");
-                model_transform = model_transform.times(Mat4.scale([ 1, 0.67, 1 ]));
-            }
-
-            else {
+            if (numOfBox == 0) {
+                this.shapes.strip.draw(graphics_state, model_transform, this.plastic.override({color}), "TRIANGLE_STRIP");
+                model_transform = model_transform.times(Mat4.scale([1, (2/3), 1]));
+            } else {
                 if (this.outline) {
                     this.shapes.outline.draw(graphics_state, model_transform, this.white, "LINES");
-                    model_transform = model_transform.times(Mat4.scale([1, 0.67, 1]));
+                    model_transform = model_transform.times(Mat4.scale([1, (2/3), 1]));
                 } else {
                     this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color}));
-                    model_transform = model_transform.times(Mat4.scale([1, 0.67, 1]));
+                    model_transform = model_transform.times(Mat4.scale([1, (2/3), 1]));
                 }
             }
             return model_transform;
@@ -245,10 +258,8 @@ let rotation;
             let model_transform = Mat4.identity();
 
             // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
-            for (let i = 0; i < 8; i++)
-            {
-               //this.numOfBox = i;
-                model_transform = this.draw_box( graphics_state, model_transform,i);
+            for (let i = 0; i < 8; i++) {
+                model_transform = this.draw_box(graphics_state, model_transform, i);
             }
 
 
